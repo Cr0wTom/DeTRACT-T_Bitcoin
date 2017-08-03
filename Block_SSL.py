@@ -1,7 +1,7 @@
 #!/usr/bin/python
-import hashlib
-import string
+import sys, string, hashlib
 from Crypto.PublicKey import RSA
+from OP_RETURN import *
 
 CN = raw_input("Which is the primary Host Name of your website (Common Name - CN)?") #Common Name
 O = raw_input("Which is the Organizations name?") #Organization
@@ -33,4 +33,19 @@ m = hashlib.sha256()
 m.update(FS)
 print "\nThe string for hashing is %s" %FS
 print "\nYour Certificate is: ", m.hexdigest()
-print "Run 'python send-OP_RETURN.py <send-address> <send-amount> <certificate>' to send your certificate to the blockchain."
+ans2 = raw_input("Do you want to send your certificate to the blockchain. [Y]es [N]o, default: [Y]")
+if ans2 == "Y" or ans2 == "y" or ans2 == "" or ans2 == " ":
+    send_address = raw_input("Give your bitcoin address: ") # Transaction to the same bitcoin address
+    send_amount = 0.00009 # Minimum ammount of bitcoin transaction fee
+    metadata = m.hexdigest() # metadata equals the SHA256 hash that was previously denerated
+    metadata_from_hex=OP_RETURN_hex_to_bin(metadata)
+    if metadata_from_hex is not None:
+	       metadata=metadata_from_hex
+
+    result=OP_RETURN_send(send_address, float(send_amount), metadata)
+    if 'error' in result:
+	       print('Error: '+result['error'])
+    else:
+	       print('TxID: '+result['txid']+'\nWait a few seconds then check on: http://coinsecrets.org/')
+else:
+    sys.exit()
