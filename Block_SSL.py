@@ -5,7 +5,7 @@ from OP_RETURN import *
 
 CN = raw_input("Which is the primary Host Name of your website (Common Name - CN)?") #Common Name
 O = raw_input("Which is the Organizations name?") #Organization
-O.replace(" ", "_") #Replace the spaces of the Organization with underscores
+O2 = O.replace(" ", "_") #Replace the spaces of the Organization with underscores
 ans = raw_input("Do you have a key pair? [Y]es [N]o, default: [Y]")
 if ans == "Y" or ans == "y" or ans == "" or ans == " ":
     PK = raw_input("Which is your publick key?") #Public Key of the owner
@@ -26,14 +26,14 @@ else:
     PK = key.publickey().exportKey()
 
 
-#PK.replace("-----BEGIN RSA PUBLIC KEY-----", "") #Remove header
-#PK.replace("-----END RSA PUBLIC KEY-----", "") #Remove footer
-FS = CN + ";" + O + ";" + PK + ";" #Final String - concatenation
+PK2 = PK.replace("-----BEGIN RSA PUBLIC KEY-----", "") #Remove header
+PK3 = PK2.replace("-----END RSA PUBLIC KEY-----", "") #Remove footer
+FS = CN + ";" + O2 + ";" + PK3 + ";" #Final String - concatenation
 m = hashlib.sha256()
 m.update(FS)
 print "\nThe string for hashing is %s" %FS
 print "\nYour Certificate is: ", m.hexdigest()
-ans2 = raw_input("Do you want to send your certificate to the blockchain. [Y]es [N]o, default: [Y]")
+ans2 = raw_input("Do you want to send your certificate to the blockchain? [Y]es [N]o, default: [Y]")
 if ans2 == "Y" or ans2 == "y" or ans2 == "" or ans2 == " ":
     send_address = raw_input("Give your bitcoin address: ") # Transaction to the same bitcoin address
     send_amount = 0.00009 # Minimum ammount of bitcoin transaction fee
