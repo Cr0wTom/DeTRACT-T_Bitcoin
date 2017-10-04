@@ -1,20 +1,68 @@
 #!/usr/bin/python
 
-#Copyright 2017 Thomas Sermpinis (a.k.a. Cr0wTom)
+import sys, string, pybitcoin
+# For pybitcoin download and install from: https://github.com/blockstack/pybitcoin.git
 
-#Permission is hereby granted, free of charge, to any person obtaining a copy of this software
-#and associated documentation files (the "Software"), to deal in the Software without restriction,
-#including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
-#and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+def identityCreation():
+    ex = raw_input("Do you already own a BitCoin address that you want to use? [Y]es [N]o, default: [Y]")
+    if ex == "Y" or ex == "y" or ex == "" or ex == " ":
+        gen_priv = raw_input("Which is your private key?") #Private Key of the owner
+        print "Saving to Generation_Private.pem file..."
+        open("Generation_Private.pem","w").write(gen_priv.to_pem()) #Saving to file
+        print "Generating \"Generation\" Public Key..."
+        gen_pub = gen_priv.public_key() #Generate the "Generation" public key from gen_priv
+        print "Saving to Generation_Public.pem file..."
+        open("Generation_Public.pem","w").write(gen_pub.to_pem()) #Saving to file
+        print "Public/Private key pair creation:"
+        print "Warning: This is a pseudo-random generation."
+        print "Warning: If you want complete randomness consider other ways of Public/Private key pair generation."
 
-#The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+    else:
+        print "Public/Private key pair creation:"
+        print "Warning: This is a pseudo-random generation."
+        print "Warning: If you want complete randomness consider other ways of Public/Private key pair generation."
 
-#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
-#INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-#IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-#WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+        print "Generating \"Generation\" Private Key..."
+        gen_priv = BitcoinPrivateKey() #Generate the "Generation" private key
+        print "Saving to Generation_Private.pem file..."
+        open("Generation_Private.pem","w").write(gen_priv.to_pem()) #Saving to file
+        print "Generating \"Generation\" Public Key..."
+        gen_pub = gen_priv.public_key() #Generate the "Generation" public key from gen_priv
+        print "Saving to Generation_Public.pem file..."
+        open("Generation_Public.pem","w").write(gen_pub.to_pem()) #Saving to file
 
-import sys, string
+    print "Generating \"Certificate\" Private Key..."
+    cert_priv = BitcoinPrivateKey() #Generate the "Certificate" private key
+    print "Saving to Certificate_Private.pem file..."
+    open("Certificate_Private.pem","w").write(cert_priv.to_pem()) #Saving to file
+    print "Generating \"Certificate\" Public Key..."
+    cert_pub = cert_priv.public_key()#Generate the "Certificate" public key from cert_priv
+    print "Saving to Certificate_Public.pem file..."
+    open("Certificate_Public.pem","w").write(cert_pub.to_pem()) #Saving to file
+
+    print "Generating \"Revocation\" Private Key..."
+    rev_priv = BitcoinPrivateKey() #Generate the "Revocation" private key
+    print "Saving to Revocation_Private.pem file..."
+    open("Revocation_Private.pem","w").write(rev_priv.to_pem()) #Saving to file
+    print "Generating \"Revocation\" Public Key..."
+    rev_pub = rev_priv.public_key() #Generate the "Revocation" public key from rev_priv
+    print "Saving to Revocation_Public.pem file..."
+    open("Revocation_Public.pem","w").write(rev_pub.to_pem()) #Saving to file
+
+    print "\nYour addresses are:"
+    print "\nGeneration Address: ", gen_pub.address()
+    print "\nCertificate Address: ", cert_pub.address()
+    print "\nRevocation Address: ", rev_pub.address()
+    print "\nWarning: Please keep your Revocation address secret!"
+
+
+def identityCheck():
+
+def certificateCreation():
+
+def certificateUpdate():
+
+def certificateRevocation():
 
 def main():
     argu = sys.argv
@@ -35,7 +83,7 @@ def main():
         print "\t -r\t Certificate Revocation"
         print "\n"
         sys.exit()
-    elif argu[1] == "-ii":
+    elif argu[1] == "-i":
         #Identity Creation Script
         identityCreation()
         sys.exit()
