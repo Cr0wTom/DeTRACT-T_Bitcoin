@@ -1,6 +1,12 @@
 #!/usr/bin/python
 
-import sys, string, pybitcoin, hashlib, os, random, struct, getpass
+import sys
+import string
+import hashlib
+import os
+import random
+import struct
+import getpass
 from Crypto.Cipher import AES
 from pybitcoin import BitcoinPrivateKey
 #For pybitcoin download and install from:
@@ -113,9 +119,10 @@ def encrypt_file(key, in_filename, out_filename=None, chunksize=64*1024):
 
                 outfile.write(encryptor.encrypt(chunk))
 
+
 def decrypt_file(key, in_filename, out_filename=None, chunksize=24*1024):
 
-
+    #Thanks to Eli Bendersky: https://eli.thegreenplace.net/2010/06/25/aes-encryption-of-files-in-python-with-pycrypto/
     if not out_filename:
         out_filename = os.path.splitext(in_filename)[0]
 
@@ -135,77 +142,78 @@ def decrypt_file(key, in_filename, out_filename=None, chunksize=24*1024):
 
 
 def main(argu):
-    if argu[1] == "--help" or argu[1] == "-h":
-        #Option to helo with the usage of the script
-        print "Usage: \"Block_SSL.py <option>\""
-        print "\nFor a list of options use the --list option."
-        print "\n"
+    try:
+        if argu[1] == "--help" or argu[1] == "-h":
+            #Option to helo with the usage of the script
+            print "Usage: \"Block_SSL.py <option>\""
+            print "\nFor a list of options use the --list option."
+            print "\n"
 
-    elif argu[1] == "--list":
-        #List of available options that the user can use
-        print "Usage: \"Block_SSL.py <option>\""
-        print "This is the list of options you can use with Block_SSL. \n"
-        print "\t -i\t Identity Creation"
-        print "\t -ii\t Identity Check"
-        print "\t -cc\t Certificate Creation"
-        print "\t -u\t Certificate Update"
-        print "\t -r\t Certificate Revocation"
-        print "\t -d\t Decrypt Private Key files"
-        print "\n"
+        elif argu[1] == "--list":
+            #List of available options that the user can use
+            print "Usage: \"Block_SSL.py <option>\""
+            print "This is the list of options you can use with Block_SSL. \n"
+            print "\t -i\t Identity Creation"
+            print "\t -ii\t Identity Check"
+            print "\t -cc\t Certificate Creation"
+            print "\t -u\t Certificate Update"
+            print "\t -r\t Certificate Revocation"
+            print "\t -d\t Decrypt Private Key files"
+            print "\n"
 
-    elif argu[1] == "-i":
-        #Identity Creation Script
-        identityCreation()
+        elif argu[1] == "-i":
+            #Identity Creation Script
+            identityCreation()
 
-    elif argu[1] == "-ii":
-        #Identity Check Script
-        identityCheck()
+        elif argu[1] == "-ii":
+            #Identity Check Script
+            identityCheck()
 
-    elif argu[1] == "-cc":
-        #Certificate Creation Script
-        certificateCreation()
+        elif argu[1] == "-cc":
+            #Certificate Creation Script
+            certificateCreation()
 
-    elif argu[1] == "-u":
-        #Certificate Update Script
-        certificateUpdate()
+        elif argu[1] == "-u":
+            #Certificate Update Script
+            certificateUpdate()
 
-    elif argu[1] == "-r":
-        #Certificate Revocation Script
-        certificateRevocation()
+        elif argu[1] == "-r":
+            #Certificate Revocation Script
+            certificateRevocation()
 
-    elif argu[1] == "-d":
-        #Private Key Decryption Script
-        password = getpass.getpass("Give your password: ")  #Ask for encryption password
-        key = hashlib.sha256(password).digest()
+        elif argu[1] == "-d":
+            #Private Key Decryption Script
+            password = getpass.getpass("Give your password: ")  #Ask for encryption password
+            key = hashlib.sha256(password).digest()
 
-        #Generation Private key decryption
-        if os.path.isfile('./Generation_Private.pem.enc'):
-            print "\n Generation Private Key exists."
-            decrypt_file(key, "Generation_Private.pem.enc")
-            print "\nDecrypting Generation Private Key..."
-            print "Saving to Generation_Private.pem..."
-        else:
-            print "\n Generation Private Key does not exist."
+            #Generation Private key decryption
+            if os.path.isfile('./Generation_Private.pem.enc'):
+                print "\n Generation Private Key exists."
+                decrypt_file(key, "Generation_Private.pem.enc")
+                print "\nDecrypting Generation Private Key..."
+                print "Saving to Generation_Private.pem..."
+            else:
+                print "\n Generation Private Key does not exist."
 
-        #Certificate Private key decryption
-        if os.path.isfile('./Certificate_Private.pem.enc'):
-            print "\n Certificate Private Key exists."
-            decrypt_file(key, "Certificate_Private.pem.enc")
-            print "\nDecrypting Certificate Private Key..."
-            print "Saving to Certificate_Private.pem..."
-        else:
-            print "\n Certificate Private Key does not exist."
+            #Certificate Private key decryption
+            if os.path.isfile('./Certificate_Private.pem.enc'):
+                print "\n Certificate Private Key exists."
+                decrypt_file(key, "Certificate_Private.pem.enc")
+                print "\nDecrypting Certificate Private Key..."
+                print "Saving to Certificate_Private.pem..."
+            else:
+                print "\n Certificate Private Key does not exist."
 
-        #Revocation Private key decryption
-        if os.path.isfile('./Revocation_Private.pem.enc'):
-            print "\n Revocation Private Key exists."
-            decrypt_file(key, "Revocation_Private.pem.enc")
-            print "\nDecrypting Revocation Private Key..."
-            print "Saving to Revocation_Private.pem..."
-        else:
-            print "\n Revocation Private Key does not exist."
+            #Revocation Private key decryption
+            if os.path.isfile('./Revocation_Private.pem.enc'):
+                print "\n Revocation Private Key exists."
+                decrypt_file(key, "Revocation_Private.pem.enc")
+                print "\nDecrypting Revocation Private Key..."
+                print "Saving to Revocation_Private.pem..."
+            else:
+                print "\n Revocation Private Key does not exist."
 
-    elif argu[1] is None:
+    except IndexError:
         print "Usage: \"Block_SSL.py <option>\""
         print "\nFor a list of options use the --list option."
         print "\nFor help use the --help or -h option."
