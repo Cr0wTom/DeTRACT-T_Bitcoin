@@ -6,4 +6,4 @@ Thesis Project - Aristotle University of Thessaloniki
 
 Contact me: http://cr0wsplace.wordpress.com/
 
-MIT License (see headers in files)
+MIT License
