@@ -16,7 +16,8 @@ from pybitcoin import BitcoinPrivateKey
 def identityCreation():
     ex = raw_input("Do you already own a BitCoin address that you want to use? [Y]es [N]o, default: [Y]")
     if ex == "Y" or ex == "y" or ex == "" or ex == " ":
-        gen_priv = raw_input("Which is your private key?")  #Private Key of the owner
+        gen_priv = raw_input("Which is your private key? (in hexadecimal format)\n")  #Private Key of the owner
+        gen_priv = BitcoinPrivateKey(gen_priv)
         print "Saving to Generation_Private.pem file..."
         open("Generation_Private.pem", "w").write(gen_priv.to_pem())  #Saving to file
         print "Generating \"Generation\" Public Key..."
