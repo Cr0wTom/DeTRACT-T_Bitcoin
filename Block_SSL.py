@@ -80,6 +80,10 @@ def identityCreation():
         sys.exit()
 
 
+def identityUpdate():
+    sys.exit()
+
+
 def identityCheck():
     sys.exit()
 
@@ -155,6 +159,7 @@ def main(argu):
             print "Usage: \"Block_SSL.py <option>\""
             print "This is the list of options you can use with Block_SSL. \n"
             print "\t -i\t Identity Creation"
+            print "\t -i\t Identity Update"
             print "\t -ii\t Identity Check"
             print "\t -cc\t Certificate Creation"
             print "\t -u\t Certificate Update"
@@ -165,6 +170,10 @@ def main(argu):
         elif argu[1] == "-i":
             #Identity Creation Script
             identityCreation()
+
+        elif argu[1] == "-iu":
+            #Identity Update Script
+            identityUpdate()
 
         elif argu[1] == "-ii":
             #Identity Check Script
