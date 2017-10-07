@@ -9,6 +9,7 @@ import struct
 import getpass
 from Crypto.Cipher import AES
 from pybitcoin import BitcoinPrivateKey
+from OpenSSL import crypto, SSL
 #For pybitcoin download and install from:
 #https://github.com/blockstack/pybitcoin.git
 
@@ -31,7 +32,7 @@ def identityCreation():
     else:
         print "Public/Private key pair creation:"
         print "Warning: This is a pseudo-random generation."
-        print "Warning: If you want complete randomness consider other ways of Public/Private key pair generation."
+        print "Warning: If you want complete randomness consider other ways of Public/Private key pair generation.\n"
 
         print "Generating \"Generation\" Private Key..."
         gen_priv = BitcoinPrivateKey()  #Generate the "Generation" private key
@@ -89,8 +90,41 @@ def identityCheck():
 
 
 def certificateCreation():
-    sys.exit()
+    # create a key pair
+    print "Creating a new key pair:"
+    print "Warning: This is a pseudo-random generation.\n"
+    k = crypto.PKey()
+    k.generate_key(crypto.TYPE_RSA, 1024)
 
+    # create a self-signed cert
+    cert = crypto.X509()
+    country = raw_input("Country Name (2 letter code): ")
+    cert.get_subject().C = country
+    state = raw_input("State or Province Name (full name): ")
+    cert.get_subject().ST = state
+    local = raw_input("Locality Name (eg, city): ")
+    cert.get_subject().L = local
+    org = raw_input("Organization Name (eg, company): ")
+    cert.get_subject().O = org
+    orgu = raw_input("Organizational Unit Name (eg, section): ")
+    cert.get_subject().OU = orgu
+    cn = raw_input("Common Name (eg, fully qualified host name): ")
+    cert.get_subject().CN = cn
+    email = raw_input("email Address: ")
+    cert.get_subject().emailAddress = email
+    cert.set_serial_number(1000) #todo - take the number from merkle tree
+    cert.gmtime_adj_notBefore(0)
+    cert.gmtime_adj_notAfter(10*365*24*60*60) #todo -  ask for the expiration of the certificate
+    cert.set_issuer(cert.get_subject()) #todo - add the signatures as issuer
+    cert.set_pubkey(k)
+    cert.sign(k, 'sha256')
+
+    #todo - change the lame file names
+    open("certificate.crt", "wt").write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert))
+    open("keys.key", "wt").write(crypto.dump_privatekey(crypto.FILETYPE_PEM, k))
+    sys.exit()
+    print "\nCertificate created in file: certificate.crt"
+    print "Keys saved in file: keys.key"
 
 def certificateUpdate():
     sys.exit()
