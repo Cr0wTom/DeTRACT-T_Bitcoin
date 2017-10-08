@@ -8,13 +8,14 @@ import random
 import struct
 import getpass
 from Crypto.Cipher import AES
-from pybitcoin import BitcoinPrivateKey
+from pybitcoin import BitcoinPrivateKey, make_op_return_tx
 from OpenSSL import crypto, SSL
 #For pybitcoin download and install from:
 #https://github.com/blockstack/pybitcoin.git
 
 
 def identityCreation():
+    print "\nIdentity Creation Script - Block SSL\n"
     ex = raw_input("Do you already own a BitCoin address that you want to use? [Y]es [N]o, default: [Y]")
     if ex == "Y" or ex == "y" or ex == "" or ex == " ":
         gen_priv = raw_input("Which is your private key? (in hexadecimal format)\n")  #Private Key of the owner
@@ -61,6 +62,9 @@ def identityCreation():
     print "Saving to Revocation_Public.pem file..."
     open("Revocation_Public.pem", "w").write(rev_pub.to_pem())  #Saving to file
 
+    open("Gen_Address.txt", "w").write(gen_pub.address()) #save the addresses to make the hash later
+    open("Rev_Address.txt", "w").write(rev_pub.address())
+    open("Cert_Address.txt", "w").write(cert_pub.address()) #save it for the transaction
     print "\nYour addresses are:"
     print "\nGeneration Address: ", gen_pub.address()
     print "\nCertificate Address: ", cert_pub.address()
@@ -90,6 +94,7 @@ def identityCheck():
 
 
 def certificateCreation():
+    print "\nCertificate Creation Script - Block SSL\n"
     # create a key pair
     print "Creating a new key pair:"
     print "Warning: This is a pseudo-random generation.\n"
@@ -115,16 +120,40 @@ def certificateCreation():
     cert.set_serial_number(1000) #todo - take the number from merkle tree
     cert.gmtime_adj_notBefore(0)
     cert.gmtime_adj_notAfter(10*365*24*60*60) #todo -  ask for the expiration of the certificate
-    cert.set_issuer(cert.get_subject()) #todo - add the signatures as issuer
+    print "Adding the GE and RV signatures to the issuer field..."
+    message_gen = open("Gen_Address.txt", "rb").read()
+    m1 = hashlib.sha256()
+    m1.update(message_gen)
+    m1 = m1.hexdigest()
+    message_rev = open("Rev_Address.txt", "rb").read()
+    m2 = hashlib.sha256()
+    m2.update(message_rev)
+    m2 = m2.hexdigest()
+    cert.get_issuer().CN = m1 #Generation address at the CN issuer field
+    cert.get_issuer().O = m2 #Revocation address at the O issuer field
     cert.set_pubkey(k)
     cert.sign(k, 'sha256')
 
     #todo - change the lame file names
     open("certificate.crt", "wt").write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert))
     open("keys.key", "wt").write(crypto.dump_privatekey(crypto.FILETYPE_PEM, k))
-    sys.exit()
     print "\nCertificate created in file: certificate.crt"
-    print "Keys saved in file: keys.key"
+    print "Keys saved in file: keys.key\n"
+
+    ans2 = raw_input("Do you want to send your certificate to the blockchain? [Y]es [N]o, default: [Y]")
+    if ans2 == "Y" or ans2 == "y" or ans2 == "" or ans2 == " ":
+        #Hashing of the certificate
+        f = open("certificate.crt", "rb") #read file in binary mode
+        fr = f.read()
+        cert_hash = hashlib.sha256() #use the SHA256 hashing algorithm
+        cert_hash.update(fr)
+        data = cert_hash.hexdigest()
+        print "\nYour Certificate hash is: ", data
+        print "\nAdding to OP_RETURN..."
+        tx = make_op_return_tx(data, private_key.to_hex(), blockchain_client, fee=10000, format='bin')
+
+    sys.exit()
+
 
 def certificateUpdate():
     sys.exit()
