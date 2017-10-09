@@ -8,7 +8,7 @@ import random
 import struct
 import getpass
 from Crypto.Cipher import AES
-from pybitcoin import BitcoinPrivateKey, make_op_return_tx
+from pybitcoin import BitcoinPrivateKey, make_op_return_tx, BlockcypherClient
 from OpenSSL import crypto, SSL
 #For pybitcoin download and install from:
 #https://github.com/blockstack/pybitcoin.git
@@ -117,7 +117,7 @@ def certificateCreation():
     cert.get_subject().CN = cn
     email = raw_input("email Address: ")
     cert.get_subject().emailAddress = email
-    cert.set_serial_number(1000) #todo - take the number from merkle tree
+    cert.set_serial_number(1000) #todo - take the last number from merkle tree
     cert.gmtime_adj_notBefore(0)
     cert.gmtime_adj_notAfter(10*365*24*60*60) #todo -  ask for the expiration of the certificate
     print "Adding the GE and RV signatures to the issuer field..."
@@ -150,7 +150,30 @@ def certificateCreation():
         data = cert_hash.hexdigest()
         print "\nYour Certificate hash is: ", data
         print "\nAdding to OP_RETURN..."
-        tx = make_op_return_tx(data, private_key.to_hex(), blockchain_client, fee=10000, format='bin')
+        #Opening Generation private key from pem file
+        if os.path.isfile('./Generation_Private.pem'):
+            print "\n Generation Private Key file exists."
+            sk = SigningKey.from_pem(open("Generation_Private.pem").read())
+            sk_string = sk.to_string()
+            sk = str(sk_string)
+            sk = sk.encode("hex")
+        elif os.path.isfile('./Generation_Private.pem.enc'):
+            print "\n Generation Private Key encoded file exists."
+            decrypt_file(key, "Generation_Private.pem.enc")
+            print "\nDecrypting Generation Private Key..."
+            print "Saving to Generation_Private.pem..."
+            sk = SigningKey.from_pem(open("Generation_Private.pem").read())
+            sk_string = sk.to_string()
+            sk = str(sk_string)
+            sk = sk.encode("hex")
+        else:
+            print "\nGeneration Private Key does not exist."
+            print "\nPlease place the file in the script directory or run -i option for a new key pair.\n"
+            sys.exit()
+        recipient_address = message_gen = open("Cert_Address.txt", "rb").read()
+        blockchain_client = BlockcypherClient(auth=(api_key, None)) #I have to find an API key
+        tx = make_op_return_tx(data, sk, blockchain_client, fee=0, format='bin')
+        broadcast_transaction(tx, blockchain_client)
 
     sys.exit()
 

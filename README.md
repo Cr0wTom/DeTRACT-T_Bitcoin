@@ -1,6 +1,6 @@
 # Block-SSL
 
-SSL/TLS Certificate Authority Replacement
+SSL/TLS Certificate Authority Replacement through the BitCoin Blockchain.
 
 Thesis Project - Aristotle University of Thessaloniki
 
