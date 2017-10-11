@@ -7,6 +7,8 @@ import os
 import random
 import struct
 import getpass
+import datetime
+from datetime import timedelta
 from Crypto.Cipher import AES
 from pybitcoin import BitcoinPrivateKey, make_op_return_tx, BlockcypherClient
 from OpenSSL import crypto, SSL
@@ -119,8 +121,20 @@ def certificateCreation():
     cert.get_subject().emailAddress = email
     cert.set_serial_number(1000) #todo - take the last number from merkle tree
     cert.gmtime_adj_notBefore(0)
-    cert.gmtime_adj_notAfter(10*365*24*60*60) #todo -  ask for the expiration of the certificate
-    print "Adding the GE and RV signatures to the issuer field..."
+    now = datetime.datetime.now() #setting the time right now
+    tr = 0
+    while tr == 0:
+        an = int(raw_input("How long do you need the certificate to last in days? (maximum: 365)\n"))
+        if an < 366 and an > 0:
+            cert.gmtime_adj_notAfter(60*60*24*an)
+            tr += 1
+        else:
+            print "Please give a number smaller than 366.\n"
+            tr = 0
+    diff = datetime.timedelta(an)
+    future = now + diff
+    print future.strftime("\nYour certificate expires on %m/%d/%Y") #print the expiration date
+    print "\nAdding the GE and RV signatures to the issuer field..."
     message_gen = open("Gen_Address.txt", "rb").read()
     m1 = hashlib.sha256()
     m1.update(message_gen)
@@ -138,7 +152,7 @@ def certificateCreation():
     open("certificate.crt", "wt").write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert))
     open("keys.key", "wt").write(crypto.dump_privatekey(crypto.FILETYPE_PEM, k))
     print "\nCertificate created in file: certificate.crt"
-    print "Keys saved in file: keys.key\n"
+    print "\nKeys saved in file: keys.key\n"
 
     ans2 = raw_input("Do you want to send your certificate to the blockchain? [Y]es [N]o, default: [Y]")
     if ans2 == "Y" or ans2 == "y" or ans2 == "" or ans2 == " ":
@@ -170,6 +184,7 @@ def certificateCreation():
             print "\nGeneration Private Key does not exist."
             print "\nPlease place the file in the script directory or run -i option for a new key pair.\n"
             sys.exit()
+
         recipient_address = message_gen = open("Cert_Address.txt", "rb").read()
         blockchain_client = BlockcypherClient(auth=(api_key, None)) #I have to find an API key
         tx = make_op_return_tx(data, sk, blockchain_client, fee=0, format='bin')
