@@ -10,8 +10,9 @@ import getpass
 import datetime
 from datetime import timedelta
 from Crypto.Cipher import AES
-from pybitcoin import BitcoinPrivateKey, make_op_return_tx, BlockcypherClient
+from pybitcoin import BitcoinPrivateKey, make_op_return_tx, BlockchainInfoClient, send_to_address
 from OpenSSL import crypto, SSL
+from ecdsa import SigningKey
 #For pybitcoin download and install from:
 #https://github.com/blockstack/pybitcoin.git
 
@@ -185,10 +186,11 @@ def certificateCreation():
             print "\nPlease place the file in the script directory or run -i option for a new key pair.\n"
             sys.exit()
 
-        recipient_address = message_gen = open("Cert_Address.txt", "rb").read()
-        blockchain_client = BlockcypherClient(auth=(api_key, None)) #I have to find an API key
-        tx = make_op_return_tx(data, sk, blockchain_client, fee=0, format='bin')
+        recipient_address = open("Cert_Address.txt", "rb").read()
+        blockchain_client = BlockchainInfoClient() #I have to find an API key
+        tx = make_op_return_tx(data, sk, blockchain_client, fee=0, change_address = recipient_address, format='bin')
         broadcast_transaction(tx, blockchain_client)
+        #send_to_address(recipient_address, 10000, sk, blockchain_client)
 
     sys.exit()
 
