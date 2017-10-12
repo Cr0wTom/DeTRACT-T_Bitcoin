@@ -106,6 +106,60 @@ def certificateCreation():
 
     # create a self-signed cert
     cert = crypto.X509()
+    createCert(k, cert)
+
+    open("certificate.crt", "wt").write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert))
+    open("keys.key", "wt").write(crypto.dump_privatekey(crypto.FILETYPE_PEM, k))
+    print "\nCertificate created in file: certificate.crt"
+    print "\nKeys saved in file: keys.key\n"
+
+    ans2 = raw_input("Do you want to send your certificate to the blockchain? [Y]es [N]o, default: [Y]")
+    if ans2 == "Y" or ans2 == "y" or ans2 == "" or ans2 == " ":
+        mode = "CC: "
+        sendCertificate(mode)
+
+    sys.exit()
+
+
+def certificateUpdate():
+    print "\nCertificate Update Script - Block SSL\n"
+    # create a key pair or use the old one
+    ans = raw_input("Do you have your old keys.key file with your key pair? [Y]es [N]o, default: [Y]\n")
+    if ans == "n" or ans == "N":
+        k = crypto.PKey()
+        k.generate_key(crypto.TYPE_RSA, 1024)
+        print "Creating a new key pair:"
+        print "Warning: This is a pseudo-random generation.\n"
+    else:
+        print "Place your keys.key file in the scripts directory.\n"
+        k = crypto.PKey()
+        with open("keys.key", "r") as k:
+            k = crypto.load_privatekey(crypto.FILETYPE_PEM, k.read())
+
+    # create a self-signed cert
+    cert = crypto.X509()
+    createCert(k, cert)
+
+    open("certificate.crt", "wt").write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert))
+    print "\nCertificate created in file: certificate.crt"
+    if ans == "n" or ans == "N":
+        open("keys.key", "wt").write(crypto.dump_privatekey(crypto.FILETYPE_PEM, k))
+        print "\nKeys saved in file: keys.key\n"
+
+    ans2 = raw_input("Do you want to send your certificate to the blockchain? [Y]es [N]o, default: [Y]")
+    if ans2 == "Y" or ans2 == "y" or ans2 == "" or ans2 == " ":
+        mode = "UC: "
+        sendCertificate(mode)
+
+    sys.exit()
+
+
+def certificateRevocation():
+    sys.exit()
+
+
+def createCert(k, cert):
+    # create a self-signed cert
     country = raw_input("Country Name (2 letter code): ")
     cert.get_subject().C = country
     state = raw_input("State or Province Name (full name): ")
@@ -125,7 +179,7 @@ def certificateCreation():
     now = datetime.datetime.now() #setting the time right now
     tr = 0
     while tr == 0:
-        an = int(raw_input("How long do you need the certificate to last in days? (maximum: 365)\n"))
+        an = int(raw_input("For how long do you need to update the certificate in days? (maximum: 365)\n"))
         if an < 366 and an > 0:
             cert.gmtime_adj_notAfter(60*60*24*an)
             tr += 1
@@ -148,61 +202,47 @@ def certificateCreation():
     cert.get_issuer().O = m2 #Revocation address at the O issuer field
     cert.set_pubkey(k)
     cert.sign(k, 'sha256')
-
-    #todo - change the lame file names
-    open("certificate.crt", "wt").write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert))
-    open("keys.key", "wt").write(crypto.dump_privatekey(crypto.FILETYPE_PEM, k))
-    print "\nCertificate created in file: certificate.crt"
-    print "\nKeys saved in file: keys.key\n"
-
-    ans2 = raw_input("Do you want to send your certificate to the blockchain? [Y]es [N]o, default: [Y]")
-    if ans2 == "Y" or ans2 == "y" or ans2 == "" or ans2 == " ":
-        #Hashing of the certificate
-        f = open("certificate.crt", "rb") #read file in binary mode
-        fr = f.read()
-        cert_hash = hashlib.sha256() #use the SHA256 hashing algorithm
-        cert_hash.update(fr)
-        data = cert_hash.hexdigest()
-        print "\nYour Certificate hash is: ", data
-        print "\nAdding to OP_RETURN..."
-        #Opening Generation private key from pem file
-        if os.path.isfile('./Generation_Private.pem'):
-            print "\nGeneration Private Key file exists."
-            sk = SigningKey.from_pem(open("Generation_Private.pem").read())
-            sk_string = sk.to_string()
-            sk = str(sk_string)
-            sk = sk.encode("hex")
-        elif os.path.isfile('./Generation_Private.pem.enc'):
-            print "\nGeneration Private Key encoded file exists."
-            decrypt_file(key, "Generation_Private.pem.enc")
-            print "\nDecrypting Generation Private Key..."
-            print "Saving to Generation_Private.pem..."
-            sk = SigningKey.from_pem(open("Generation_Private.pem").read())
-            sk_string = sk.to_string()
-            sk = str(sk_string)
-            sk = sk.encode("hex")
-        else:
-            print "\nGeneration Private Key does not exist."
-            print "\nPlease place the file in the script directory or run -i option for a new key pair.\n"
-            sys.exit()
-        try:
-            recipient_address = open("Cert_Address.txt", "rb").read()
-            blockchain_client = BlockchainInfoClient()
-            tx = make_op_return_tx(data, sk, blockchain_client, fee=1000, format='bin')
-            broadcast_transaction(tx, blockchain_client)
-        except Exception:
-            print "\nNo balance in your Generation address.\n"
-            print "Please load some bitcoins in order to submit your certificate.\n"
-            
-    sys.exit()
+    return cert
 
 
-def certificateUpdate():
-    sys.exit()
-
-
-def certificateRevocation():
-    sys.exit()
+def sendCertificate(mode):
+    #Hashing of the certificate
+    f = open("certificate.crt", "rb") #read file in binary mode
+    fr = f.read()
+    cert_hash = hashlib.sha256() #use the SHA256 hashing algorithm
+    cert_hash.update(fr)
+    data = cert_hash.hexdigest()
+    print "\nYour Certificate hash is: ", data
+    data = mode + data
+    print "\nAdding to OP_RETURN..."
+    #Opening Generation private key from pem file
+    if os.path.isfile('./Generation_Private.pem'):
+        print "\nGeneration Private Key file exists."
+        sk = SigningKey.from_pem(open("Generation_Private.pem").read())
+        sk_string = sk.to_string()
+        sk = str(sk_string)
+        sk = sk.encode("hex")
+    elif os.path.isfile('./Generation_Private.pem.enc'):
+        print "\nGeneration Private Key encoded file exists."
+        decrypt_file(key, "Generation_Private.pem.enc")
+        print "\nDecrypting Generation Private Key..."
+        print "Saving to Generation_Private.pem..."
+        sk = SigningKey.from_pem(open("Generation_Private.pem").read())
+        sk_string = sk.to_string()
+        sk = str(sk_string)
+        sk = sk.encode("hex")
+    else:
+        print "\nGeneration Private Key does not exist."
+        print "\nPlease place the file in the script directory or run -i option for a new key pair.\n"
+        sys.exit()
+    try:
+        recipient_address = open("Cert_Address.txt", "rb").read()
+        blockchain_client = BlockchainInfoClient()
+        tx = make_op_return_tx(data, sk, blockchain_client, fee=1000, format='bin')
+        broadcast_transaction(tx, blockchain_client)
+    except Exception:
+        print "\nNo balance in your Generation address.\n"
+        print "Please load some bitcoins in order to submit your certificate.\n"
 
 
 def encrypt_file(key, in_filename, out_filename=None, chunksize=64*1024):
