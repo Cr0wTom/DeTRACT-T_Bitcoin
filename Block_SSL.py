@@ -167,13 +167,13 @@ def certificateCreation():
         print "\nAdding to OP_RETURN..."
         #Opening Generation private key from pem file
         if os.path.isfile('./Generation_Private.pem'):
-            print "\n Generation Private Key file exists."
+            print "\nGeneration Private Key file exists."
             sk = SigningKey.from_pem(open("Generation_Private.pem").read())
             sk_string = sk.to_string()
             sk = str(sk_string)
             sk = sk.encode("hex")
         elif os.path.isfile('./Generation_Private.pem.enc'):
-            print "\n Generation Private Key encoded file exists."
+            print "\nGeneration Private Key encoded file exists."
             decrypt_file(key, "Generation_Private.pem.enc")
             print "\nDecrypting Generation Private Key..."
             print "Saving to Generation_Private.pem..."
@@ -185,13 +185,15 @@ def certificateCreation():
             print "\nGeneration Private Key does not exist."
             print "\nPlease place the file in the script directory or run -i option for a new key pair.\n"
             sys.exit()
-
-        recipient_address = open("Cert_Address.txt", "rb").read()
-        blockchain_client = BlockchainInfoClient() #I have to find an API key
-        tx = make_op_return_tx(data, sk, blockchain_client, fee=0, change_address = recipient_address, format='bin')
-        broadcast_transaction(tx, blockchain_client)
-        #send_to_address(recipient_address, 10000, sk, blockchain_client)
-
+        try:
+            recipient_address = open("Cert_Address.txt", "rb").read()
+            blockchain_client = BlockchainInfoClient()
+            tx = make_op_return_tx(data, sk, blockchain_client, fee=1000, format='bin')
+            broadcast_transaction(tx, blockchain_client)
+        except Exception:
+            print "\nNo balance in your Generation address.\n"
+            print "Please load some bitcoins in order to submit your certificate.\n"
+            
     sys.exit()
 
 
