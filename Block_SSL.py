@@ -8,6 +8,9 @@ import random
 import struct
 import getpass
 import datetime
+import json
+import requests
+import traceback
 from datetime import timedelta
 from Crypto.Cipher import AES
 from pybitcoin import BitcoinPrivateKey, make_op_return_tx, BlockchainInfoClient, send_to_address
@@ -155,6 +158,111 @@ def certificateUpdate():
 
 
 def certificateRevocation():
+    print "\nCertificate Revocation Script - Block SSL\n"
+    print "In which of your addresses do you still have access? default: [1]\n"
+    print "\t1. All of the addresses. (Generation, Certificate, Revocation)"
+    print "\t2. Only Certificate address.\n"
+    print "\t3. Only Revocation address.\n"
+    print "\t4. Revocation and Generation addresses.\n"
+    ans = raw_input()
+    blockchain_client = BlockchainInfoClient()
+    if ans == "1" or ans == "" or ans == " " or ans = "2":
+        address = open("Cert_Address.txt", "r").read()
+        address = address.strip()
+        url = "https://blockchain.info/balance?format=json&active=" + address
+        r = requests.get(url)
+        try:
+            balance = r.json()[address]
+            balance = str(balance)
+            x = 1
+            i = 19
+            final_balance = ""
+            while x == 1:
+                if balance[i] == ",":
+                    x += 1
+                else:
+                    final_balance = final_balance + balance[i]
+                    i += 1
+            print " Your Certificate address balance is: " + final_balance
+            #Opening Generation private key from pem file
+            if os.path.isfile('./Certificate_Private.pem'):
+                print "\nCertificate Private Key file exists."
+                sk = SigningKey.from_pem(open("Certificate_Private.pem").read())
+                sk_string = sk.to_string()
+                sk = str(sk_string)
+                sk = sk.encode("hex")
+            elif os.path.isfile('./Certificate_Private.pem.enc'):
+                print "\nCertificate Private Key encoded file exists."
+                decrypt_file(key, "Certificate_Private.pem.enc")
+                print "\nDecrypting Certificate Private Key..."
+                print "Saving to Certificate_Private.pem..."
+                sk = SigningKey.from_pem(open("Certificate_Private.pem").read())
+                sk_string = sk.to_string()
+                sk = str(sk_string)
+                sk = sk.encode("hex")
+            else:
+                print "\nCertificate Private Key does not exist."
+                print "\nPlease place the .pem file in the script directory.\n"
+                sys.exit()
+        except ValueError, e:
+            raise Exception('Invalid response from blockchain.info.')
+        if ans == "1" or ans == "" or ans == " ":
+            recepient_address = open("Gen_Address.txt", "rb").read()
+            ans3 = raw_input("Which is your revocation reason?\n")
+            size = len(ans3)
+            while size > 75:
+                print "String too long for OP_RETURN transaction, please repeat.\n"
+                ans3 = raw_input("Which is your revocation reason?\n")
+                size = len(ans3)
+            data = "R1: " + ans3
+        else:
+            recepient_address = raw_input("Give the address that you want to sent the certificate balance, for revocation purposes:\n")
+            data = "R2: No access to Generation address"
+            #todo - check if the address is correct
+        try:
+            tx = make_op_return_tx(data, sk, blockchain_client, fee=1000, format='bin')
+            broadcast_transaction(tx, blockchain_client) #todo - add recepient address
+        except Exception:
+            print "\nNo balance in your Certificate address.\n"
+            print "If the Certificate address has 0 balance, it has been already been revoced.\n"
+    elif ans == "3" or ans == "4":
+        if os.path.isfile('./Revocation_Private.pem'):
+            print "\nRevocation Private Key file exists."
+            sk = SigningKey.from_pem(open("Revocation_Private.pem").read())
+            sk_string = sk.to_string()
+            sk = str(sk_string)
+            sk = sk.encode("hex")
+        elif os.path.isfile('./Revocation_Private.pem.enc'):
+            print "\nRevocation Private Key encoded file exists."
+            decrypt_file(key, "Revocation_Private.pem.enc")
+            print "\nDecrypting Revocation Private Key..."
+            print "Saving to Revocation_Private.pem..."
+            sk = SigningKey.from_pem(open("Revocation_Private.pem").read())
+            sk_string = sk.to_string()
+            sk = str(sk_string)
+            sk = sk.encode("hex")
+        else:
+            print "\nRevocation Private Key does not exist."
+            print "\nPlease place the .pem file in the script directory.\n"
+            sys.exit()
+        if os.path.isfile('./Cert_Address.txt')
+            recepient_address = open("Cert_Address.txt", "rb").read()
+        else:
+            print "\nCert_Address.txt does not exist."
+            recepient_address = raw_input("Give the Certificate address of your certificate, for the Extreme revocation transaction:\n")
+        if ans == "3":
+            data = "ER1: No Access to Generation and Certificate address"
+        else:
+            data = "ER2: No Access to Certificate address"
+        #send all the balance to given address address
+        print "\nYour revocation reason is: ", data
+        print "\nAdding revocation reason to OP_RETURN..."
+        try:
+            tx = make_op_return_tx(data, sk, blockchain_client, fee=1000, format='bin')
+            broadcast_transaction(tx, blockchain_client) #todo - add recepient address
+        except Exception:
+            print "\nNo balance in your Revocation address.\n"
+            print "Please load some bitcoins in order to submit your revocation reason.\n"
     sys.exit()
 
 
