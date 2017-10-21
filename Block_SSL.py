@@ -75,6 +75,7 @@ def identityCreation():
     print "\nGeneration Address: ", gen_pub.address()
     print "\nCertificate Address: ", cert_pub.address()
     print "\nRevocation Address: ", rev_pub.address()
+    print "\nPlease load your Generation and Revocation addresses with some satoshis."
     print "\nWarning: Please keep your Revocation address secret!"
     ans = raw_input("Do you want to encrypt your private key files? [Y]es [N]o, default: [Y]")
     if ans == "Y" or ans == "y" or ans == "" or ans == " ":
@@ -116,10 +117,39 @@ def certificateCreation():
     print "\nCertificate created in file: certificate.crt"
     print "\nKeys saved in file: keys.key\n"
 
-    ans2 = raw_input("Do you want to send your certificate to the blockchain? [Y]es [N]o, default: [Y]")
+    ans2 = raw_input("Do you have available satoshis in your Generation address? [Y]es [N]o, default: [Y]")
     if ans2 == "Y" or ans2 == "y" or ans2 == "" or ans2 == " ":
-        mode = "CC: "
-        sendCertificate(mode)
+        #Opening Generation private key from pem file
+        if os.path.isfile('./Generation_Private.pem'):
+            print "\nGeneration Private Key file exists."
+            sk = SigningKey.from_pem(open("Generation_Private.pem").read())
+            sk_string = sk.to_string()
+            sk = str(sk_string)
+            sk = sk.encode("hex")
+        elif os.path.isfile('./Generation_Private.pem.enc'):
+            print "\nGeneration Private Key encoded file exists."
+            decrypt_file(key, "Generation_Private.pem.enc")
+            print "\nDecrypting Generation Private Key..."
+            print "Saving to Generation_Private.pem..."
+            sk = SigningKey.from_pem(open("Generation_Private.pem").read())
+            sk_string = sk.to_string()
+            sk = str(sk_string)
+            sk = sk.encode("hex")
+        else:
+            print "\nGeneration Private Key does not exist."
+            print "\nPlease place the file in the script directory or run -i option for a new key pair.\n"
+            sys.exit()
+        try:
+            recipient_address = open("Cert_Address.txt", "rb").read()
+            blockchain_client = BlockchainInfoClient()
+            send_to_address(recipient_address, 164887, sk, blockchain_client)
+            print "\nWait at least 20 minutes, and run the script with option -s to send the certificate to the blockchain."
+        except Exception:
+            print "\nNo balance in your Generation address.\n"
+            print "Please load some bitcoins in order to submit your certificate.\n"
+
+    else:
+        print "Please load your Generation address and run the script again."
 
     sys.exit()
 
@@ -151,8 +181,8 @@ def certificateUpdate():
 
     ans2 = raw_input("Do you want to send your certificate to the blockchain? [Y]es [N]o, default: [Y]")
     if ans2 == "Y" or ans2 == "y" or ans2 == "" or ans2 == " ":
-        mode = "UC: "
-        sendCertificate(mode)
+        i = 2
+        sendCertificate(i)
 
     sys.exit()
 
@@ -221,7 +251,9 @@ def certificateRevocation():
             #todo - check if the address is correct
         try:
             tx = make_op_return_tx(data, sk, blockchain_client, fee=1000, format='bin')
-            broadcast_transaction(tx, blockchain_client) #todo - add recepient address
+            broadcast_transaction(tx, blockchain_client)
+            final_balance = final_balance - 1000
+            send_to_address(recipient_address, final_balance, sk, blockchain_client)
         except Exception:
             print "\nNo balance in your Certificate address.\n"
             print "If the Certificate address has 0 balance, it has been already been revoced.\n"
@@ -258,8 +290,9 @@ def certificateRevocation():
         print "\nYour revocation reason is: ", data
         print "\nAdding revocation reason to OP_RETURN..."
         try:
+            send_to_address(recipient_address, 10000, sk, blockchain_client)
             tx = make_op_return_tx(data, sk, blockchain_client, fee=1000, format='bin')
-            broadcast_transaction(tx, blockchain_client) #todo - add recepient address
+            broadcast_transaction(tx, blockchain_client)
         except Exception:
             print "\nNo balance in your Revocation address.\n"
             print "Please load some bitcoins in order to submit your revocation reason.\n"
@@ -313,7 +346,15 @@ def createCert(k, cert):
     return cert
 
 
-def sendCertificate(mode):
+def sendCertificate(i):
+    if i == 1:
+        ans = raw_input("Do you want to Create or Update your certificate? [C]reate [U]pdate, default: [C]")
+        if ans == "C" or ans == "c" or ans == "" or ans == " ":
+            mode = "CC: "
+        else:
+            mode = "UC: "
+    elif i == 2:
+        mode = "UC: "
     #Hashing of the certificate
     f = open("certificate.crt", "rb") #read file in binary mode
     fr = f.read()
@@ -324,33 +365,32 @@ def sendCertificate(mode):
     data = mode + data
     print "\nAdding to OP_RETURN..."
     #Opening Generation private key from pem file
-    if os.path.isfile('./Generation_Private.pem'):
-        print "\nGeneration Private Key file exists."
-        sk = SigningKey.from_pem(open("Generation_Private.pem").read())
+    if os.path.isfile('./Certificate_Private.pem'):
+        print "\nCertificate Private Key file exists."
+        sk = SigningKey.from_pem(open("Certificate_Private.pem").read())
         sk_string = sk.to_string()
         sk = str(sk_string)
         sk = sk.encode("hex")
-    elif os.path.isfile('./Generation_Private.pem.enc'):
-        print "\nGeneration Private Key encoded file exists."
-        decrypt_file(key, "Generation_Private.pem.enc")
-        print "\nDecrypting Generation Private Key..."
-        print "Saving to Generation_Private.pem..."
-        sk = SigningKey.from_pem(open("Generation_Private.pem").read())
+    elif os.path.isfile('./Certificate_Private.pem.enc'):
+        print "\nCertificate Private Key encoded file exists."
+        decrypt_file(key, "Certificate_Private.pem.enc")
+        print "\nDecrypting Certificate Private Key..."
+        print "Saving to Certificate_Private.pem..."
+        sk = SigningKey.from_pem(open("Certificate_Private.pem").read())
         sk_string = sk.to_string()
         sk = str(sk_string)
         sk = sk.encode("hex")
     else:
-        print "\nGeneration Private Key does not exist."
+        print "\nCertificate Private Key does not exist."
         print "\nPlease place the file in the script directory or run -i option for a new key pair.\n"
         sys.exit()
     try:
-        recipient_address = open("Cert_Address.txt", "rb").read()
         blockchain_client = BlockchainInfoClient()
-        tx = make_op_return_tx(data, sk, blockchain_client, fee=1000, format='bin')
+        tx = make_op_return_tx(data, sk, blockchain_client, fee=10000, format='bin')
         broadcast_transaction(tx, blockchain_client)
     except Exception:
-        print "\nNo balance in your Generation address.\n"
-        print "Please load some bitcoins in order to submit your certificate.\n"
+        print "\nNo balance in your Certificate address.\n"
+        print "Please first run the -cc or the -u script.\n"
 
 
 def encrypt_file(key, in_filename, out_filename=None, chunksize=64*1024):
@@ -417,6 +457,7 @@ def main(argu):
             print "\t -cc\t Certificate Creation"
             print "\t -u\t Certificate Update"
             print "\t -r\t Certificate Revocation"
+            print "\t -r\t Send Certificate"
             print "\t -d\t Decrypt Private Key files"
             print "\n"
 
@@ -443,6 +484,13 @@ def main(argu):
         elif argu[1] == "-r":
             #Certificate Revocation Script
             certificateRevocation()
+
+
+        elif argu[1] == "-s":
+            #Certificate Revocation Script
+            i = 1
+            sendCertificate(i)
+
 
         elif argu[1] == "-d":
             #Private Key Decryption Script
