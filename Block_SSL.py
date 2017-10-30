@@ -22,6 +22,17 @@ from ecdsa import SigningKey
 
 def identityCreation():
     print "\nIdentity Creation Script - Block SSL\n"
+    ans1 = raw_input("Do you own a Keybase.io account? [Y]es [N]o, default: [Y]\n")
+    if ans1 == "Y" or ans1 == "y" or ans1 == "" or ans1 == " ": #todo - check if keybase is installed
+        os.system("keybase version") #check for keybase version
+        print "Checking for Updates...\n"
+        os.system("echo 3 | keybase update check >/dev/null 2>&1") #check for keybase updates without terminal output
+        os.system("keybase login") #login to keybase through terminal
+    else:
+        os.system("keybase version")
+        print "Checking for Updates...\n"
+        os.system('echo 3 | keybase update check >/dev/null 2>&1')
+        os.system("keybase signup") #signup to keybase through terminal
     ex = raw_input("Do you already own a BitCoin address that you want to use? [Y]es [N]o, default: [Y]")
     if ex == "Y" or ex == "y" or ex == "" or ex == " ":
         gen_priv = raw_input("Which is your private key? (in hexadecimal format)\n")  #Private Key of the owner
@@ -75,6 +86,9 @@ def identityCreation():
     print "\nGeneration Address: ", gen_pub.address()
     print "\nCertificate Address: ", cert_pub.address()
     print "\nRevocation Address: ", rev_pub.address()
+    certadd = cert_pub.address()
+    os.system("echo 3 | keybase currency add --force " + certadd + " >/dev/null 2>&1") #add cert address to keybase account
+    print "Certificate address added to your keybase.io account.\n"
     print "\nPlease load your Generation and Revocation addresses with some satoshis."
     print "\nWarning: Please keep your Revocation address secret!"
     ans = raw_input("Do you want to encrypt your private key files? [Y]es [N]o, default: [Y]")
@@ -93,7 +107,16 @@ def identityCreation():
 
 
 def identityUpdate():
+    print "\nIdentity Update Script - Block SSL\n"
+    select = raw_input("Which way do you want to update your digital Identity - Generation Address? default: [1]\n")
+    print "\t1. Vote from other user.\n"
+    print "\t2. Facebook Registration\n"
+    print "\t3. Twitter Registration.\n"
+    print "\t4. .\n"
+    ans = raw_input()
+#https://github.com/ianchesal/keybase-python
     sys.exit()
+
 
 
 def identityCheck():
@@ -142,7 +165,7 @@ def certificateCreation():
         try:
             recipient_address = open("Cert_Address.txt", "rb").read()
             blockchain_client = BlockchainInfoClient()
-            send_to_address(recipient_address, 164887, sk, blockchain_client)
+            send_to_address(recipient_address, 164887, sk, blockchain_client) #make a ~10$ transactrion to cert address
             print "\nWait at least 20 minutes, and run the script with option -s to send the certificate to the blockchain."
         except Exception:
             print "\nNo balance in your Generation address.\n"
@@ -196,7 +219,7 @@ def certificateRevocation():
     print "\t4. Revocation and Generation addresses.\n"
     ans = raw_input()
     blockchain_client = BlockchainInfoClient()
-    if ans == "1" or ans == "" or ans == " " or ans = "2":
+    if ans == "1" or ans == "" or ans == " " or ans == "2":
         address = open("Cert_Address.txt", "r").read()
         address = address.strip()
         url = "https://blockchain.info/balance?format=json&active=" + address
@@ -277,7 +300,7 @@ def certificateRevocation():
             print "\nRevocation Private Key does not exist."
             print "\nPlease place the .pem file in the script directory.\n"
             sys.exit()
-        if os.path.isfile('./Cert_Address.txt')
+        if os.path.isfile('./Cert_Address.txt'):
             recepient_address = open("Cert_Address.txt", "rb").read()
         else:
             print "\nCert_Address.txt does not exist."
@@ -457,7 +480,7 @@ def main(argu):
             print "\t -cc\t Certificate Creation"
             print "\t -u\t Certificate Update"
             print "\t -r\t Certificate Revocation"
-            print "\t -r\t Send Certificate"
+            print "\t -s\t Send Certificate"
             print "\t -d\t Decrypt Private Key files"
             print "\n"
 
@@ -485,12 +508,10 @@ def main(argu):
             #Certificate Revocation Script
             certificateRevocation()
 
-
         elif argu[1] == "-s":
             #Certificate Revocation Script
             i = 1
             sendCertificate(i)
-
 
         elif argu[1] == "-d":
             #Private Key Decryption Script
