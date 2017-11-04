@@ -137,7 +137,7 @@ def identityUpdate():
     print "\t3. Twitter Registration.\n"
     print "\t4. .\n"
     ans = raw_input()
-#https://github.com/ianchesal/keybase-python
+    #generate new proof keybase prove
     sys.exit()
 
 
@@ -187,7 +187,7 @@ def certificateCreation():
             sys.exit()
         try:
             recipient_address = open("Cert_Address.txt", "rb").read()
-            blockchain_client = BlockchainInfoClient()
+            blockchain_client = BlockchainInfoClient("dacc6a40-1b8f-4dbb-afc7-bc9657603e83")
             send_to_address(recipient_address, 164887, sk, blockchain_client) #make a ~10$ transactrion to cert address
             print "\nWait at least 20 minutes, and run the script with option -s to send the certificate to the blockchain."
         except Exception:
@@ -241,7 +241,7 @@ def certificateRevocation():
     print "\t3. Only Revocation address.\n"
     print "\t4. Revocation and Generation addresses.\n"
     ans = raw_input()
-    blockchain_client = BlockchainInfoClient()
+    blockchain_client = BlockchainInfoClient("dacc6a40-1b8f-4dbb-afc7-bc9657603e83")
     if ans == "1" or ans == "" or ans == " " or ans == "2":
         address = open("Cert_Address.txt", "r").read()
         address = address.strip()
@@ -431,7 +431,7 @@ def sendCertificate(i):
         print "\nPlease place the file in the script directory or run -i option for a new key pair.\n"
         sys.exit()
     try:
-        blockchain_client = BlockchainInfoClient()
+        blockchain_client = BlockchainInfoClient("dacc6a40-1b8f-4dbb-afc7-bc9657603e83")
         tx = make_op_return_tx(data, sk, blockchain_client, fee=10000, format='bin')
         broadcast_transaction(tx, blockchain_client)
     except Exception:
