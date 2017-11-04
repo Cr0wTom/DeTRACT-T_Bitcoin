@@ -11,6 +11,7 @@ import datetime
 import json
 import requests
 import traceback
+import subprocess
 from datetime import timedelta
 from Crypto.Cipher import AES
 from pybitcoin import BitcoinPrivateKey, make_op_return_tx, BlockchainInfoClient, send_to_address
@@ -22,6 +23,28 @@ from ecdsa import SigningKey
 
 def identityCreation():
     print "\nIdentity Creation Script - Block SSL\n"
+    name = "keybase"
+    try: #check if keybase exists
+        devnull = open(os.devnull)
+        subprocess.Popen([name], stdout=devnull, stderr=devnull).communicate()
+        print "Keybase exists.\n"
+    except OSError as e: #install keybase - os specific
+            if e.errno == os.errno.ENOENT:
+                if sys.platform == "linux" or sys.platform == "linux2": #todo - currently only ubuntu based .deb files
+                    print "Downloading Keybase.dmg"
+                    os.system("curl -O https://prerelease.keybase.io/keybase_amd64.deb")
+                    print "Type your SuperUser Password:\n"
+                    os.system("sudo dpkg -i keybase_amd64.deb")
+                    os.system("sudo apt-get install -f")
+                elif sys.platform == "win32": #all Windows versions - run with powershell
+                    print "Downloading Keybase.exe\n"
+                    subprocess.call([$down = New-Object System.Net.WebClient; $url = 'https://prerelease.keybase.io/keybase_setup_386.exe'; $file = 'keybase_setup_386.exe'; $down.DownloadFile($url,$file); $exec = New-Object -com shell.application; $exec.shellexecute($file); exit;])
+                elif sys.platform == "darwin": #all OSX versions
+                    print "Downloading Keybase.dmg"
+                    os.system("curl -O https://prerelease.keybase.io/Keybase.dmg")
+                    print "Type your SuperUser Password:\n"
+                    os.system("sudo hdiutil attach keybase.dmg")
+                    os.system("sudo cp -ir /Volumes/Keybase/Keybase.app /Applications")
     ans1 = raw_input("Do you own a Keybase.io account? [Y]es [N]o, default: [Y]\n")
     if ans1 == "Y" or ans1 == "y" or ans1 == "" or ans1 == " ": #todo - check if keybase is installed
         os.system("keybase version") #check for keybase version
