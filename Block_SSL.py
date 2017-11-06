@@ -58,7 +58,8 @@ def identityCreation():
                     os.system("sudo apt-get install -f")
                 elif sys.platform == "win32": #all Windows versions - run with powershell
                     print "Downloading Keybase.exe\n"
-                    #subprocess.call([$down = New-Object System.Net.WebClient; $url = 'https://prerelease.keybase.io/keybase_setup_386.exe'; $file = 'keybase_setup_386.exe'; $down.DownloadFile($url,$file); $exec = New-Object -com shell.application; $exec.shellexecute($file); exit;])
+                    #download and run of the installation .exe with powershell
+                    subprocess.call(["C:\\WINDOWS\\system32\\WindowsPowerShell\\v1.0\\powershell.exe", "$down = New-Object System.Net.WebClient; $url = 'https://prerelease.keybase.io/keybase_setup_386.exe'; $file = 'keybase_setup_386.exe'; $down.DownloadFile($url,$file); $exec = New-Object -com shell.application; $exec.shellexecute($file); exit;"])
                 elif sys.platform == "darwin": #all OSX versions
                     print "Downloading Keybase.dmg"
                     os.system("curl -O https://prerelease.keybase.io/Keybase.dmg")
@@ -199,7 +200,7 @@ def identityUpdate():
         dns = "keybase prove dns " + dns
         os.system(dns)
     elif ans1 == "3":
-        print "123" #fix
+
     else:
         print "\nPlease run the script again, with a valid option."
         sys.exit()
