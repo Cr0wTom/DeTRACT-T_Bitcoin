@@ -20,8 +20,28 @@ from ecdsa import SigningKey
 #For pybitcoin download and install from:
 #https://github.com/blockstack/pybitcoin.git
 
+lackofart = r'''
+
+  ____  _            _           _____ _____ _
+ |  _ \| |          | |         / ____/ ____| |
+ | |_) | | ___   ___| | _______| (___| (___ | |
+ |  _ <| |/ _ \ / __| |/ /______\___ \\___ \| |
+ | |_) | | (_) | (__|   <       ____) |___) | |____
+ |____/|_|\___/ \___|_|\_\     |_____/_____/|______|
+
+ Block-SSL - SSL/TLS Certificate Authority Replacement
+        through the BitCoin Blockchain
+
+ Thesis Project - Aristotle University of Thessaloniki
+
+                    By Cr0wTom
+
+ ------------------------------------------------------
+
+'''
 
 def identityCreation():
+    print lackofart
     print "\nIdentity Creation Script - Block SSL\n"
     name = "keybase"
     try: #check if keybase exists
@@ -38,7 +58,7 @@ def identityCreation():
                     os.system("sudo apt-get install -f")
                 elif sys.platform == "win32": #all Windows versions - run with powershell
                     print "Downloading Keybase.exe\n"
-                    subprocess.call([$down = New-Object System.Net.WebClient; $url = 'https://prerelease.keybase.io/keybase_setup_386.exe'; $file = 'keybase_setup_386.exe'; $down.DownloadFile($url,$file); $exec = New-Object -com shell.application; $exec.shellexecute($file); exit;])
+                    #subprocess.call([$down = New-Object System.Net.WebClient; $url = 'https://prerelease.keybase.io/keybase_setup_386.exe'; $file = 'keybase_setup_386.exe'; $down.DownloadFile($url,$file); $exec = New-Object -com shell.application; $exec.shellexecute($file); exit;])
                 elif sys.platform == "darwin": #all OSX versions
                     print "Downloading Keybase.dmg"
                     os.system("curl -O https://prerelease.keybase.io/Keybase.dmg")
@@ -46,7 +66,7 @@ def identityCreation():
                     os.system("sudo hdiutil attach keybase.dmg")
                     os.system("sudo cp -ir /Volumes/Keybase/Keybase.app /Applications")
     ans1 = raw_input("Do you own a Keybase.io account? [Y]es [N]o, default: [Y]\n")
-    if ans1 == "Y" or ans1 == "y" or ans1 == "" or ans1 == " ": #todo - check if keybase is installed
+    if ans1 == "Y" or ans1 == "y" or ans1 == "" or ans1 == " ":
         os.system("keybase version") #check for keybase version
         print "Checking for Updates...\n"
         os.system("echo 3 | keybase update check >/dev/null 2>&1") #check for keybase updates without terminal output
@@ -130,23 +150,71 @@ def identityCreation():
 
 
 def identityUpdate():
+    print lackofart
     print "\nIdentity Update Script - Block SSL\n"
-    select = raw_input("Which way do you want to update your digital Identity - Generation Address? default: [1]\n")
-    print "\t1. Vote from other user.\n"
-    print "\t2. Facebook Registration\n"
-    print "\t3. Twitter Registration.\n"
-    print "\t4. .\n"
-    ans = raw_input()
+    print "Which way do you want to update your digital Identity - Generation Address? default: [1]\n"
+    print "\t1. Generate Social Media Proof\n"
+    print "\t2. DNS Proof\n"
+    print "\t3. Add PGP Key\n"
+    print "\t4. Create a new PGP Key\n"
+    ans1 = raw_input()
+    if ans1 == "1" or ans1 == "" or ans1 == " ":
+        print "Select the service you want to Proof:\n"
+        print "\t1. Facebook\n"
+        print "\t2. GitHub\n"
+        print "\t3. Twitter\n"
+        print "\t4. HackerNews\n"
+        print "\t5. Reddit\n"
+        ans2 = raw_input()
+        if ans2 == "1":
+            service = "facebook "
+            username = raw_input("\nGive your Facebook Username: ")
+            s = True
+        elif ans2 == "2":
+            service = "github "
+            username = raw_input("\nGive your GitHub Username: ")
+            s = True
+        elif ans2 == "3":
+            service = "twitter "
+            username = raw_input("\nGive your Twitter Username: ")
+            s = True
+        elif ans2 == "4":
+            service = "hackernews "
+            username = raw_input("\nGive your HackerNews Username: ")
+            s = True
+        elif ans2 == "5":
+            service = "reddit "
+            username = raw_input("\nGive your Reddit Username: ")
+            s = True
+        else:
+            s = False
+        if s == True:
+            command = "keybase prove " + service + username
+            os.system(command)
+        else:
+            print "\nPlease run the script again, with a valid option."
+            sys.exit()
+    elif ans1 == "2":
+        dns = raw_input("\nGive your DNS: ")
+        dns = "keybase prove dns " + dns
+        os.system(dns)
+    elif ans1 == "3":
+        print "123" #fix
+    else:
+        print "\nPlease run the script again, with a valid option."
+        sys.exit()
     #generate new proof keybase prove
     sys.exit()
 
 
 
 def identityCheck():
+    print lackofart
     sys.exit()
 
 
 def certificateCreation():
+    print lackofart
     print "\nCertificate Creation Script - Block SSL\n"
     # create a key pair
     print "Creating a new key pair:"
@@ -201,6 +269,7 @@ def certificateCreation():
 
 
 def certificateUpdate():
+    print lackofart
     print "\nCertificate Update Script - Block SSL\n"
     # create a key pair or use the old one
     ans = raw_input("Do you have your old keys.key file with your key pair? [Y]es [N]o, default: [Y]\n")
@@ -234,6 +303,7 @@ def certificateUpdate():
 
 
 def certificateRevocation():
+    print lackofart
     print "\nCertificate Revocation Script - Block SSL\n"
     print "In which of your addresses do you still have access? default: [1]\n"
     print "\t1. All of the addresses. (Generation, Certificate, Revocation)"
@@ -489,12 +559,14 @@ def main(argu):
     try:
         if argu[1] == "--help" or argu[1] == "-h":
             #Option to helo with the usage of the script
+            print lackofart
             print "Usage: \"Block_SSL.py <option>\""
             print "\nFor a list of options use the --list option."
             print "\n"
 
         elif argu[1] == "--list":
             #List of available options that the user can use
+            print lackofart
             print "Usage: \"Block_SSL.py <option>\""
             print "This is the list of options you can use with Block_SSL. \n"
             print "\t -i\t Identity Creation"
@@ -537,6 +609,7 @@ def main(argu):
             sendCertificate(i)
 
         elif argu[1] == "-d":
+            print lackofart
             #Private Key Decryption Script
             password = getpass.getpass("Give your password: ")  #Ask for encryption password
             key = hashlib.sha256(password).digest()
