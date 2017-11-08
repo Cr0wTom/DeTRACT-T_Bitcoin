@@ -221,7 +221,7 @@ def certificateCreation():
     print "Creating a new key pair:"
     print "Warning: This is a pseudo-random generation.\n"
     k = crypto.PKey()
-    k.generate_key(crypto.TYPE_RSA, 1024)
+    k.generate_key(crypto.TYPE_RSA, 4096)
 
     # create a self-signed cert
     cert = crypto.X509()
@@ -276,7 +276,7 @@ def certificateUpdate():
     ans = raw_input("Do you have your old keys.key file with your key pair? [Y]es [N]o, default: [Y]\n")
     if ans == "n" or ans == "N":
         k = crypto.PKey()
-        k.generate_key(crypto.TYPE_RSA, 1024)
+        k.generate_key(crypto.TYPE_RSA, 4096)
         print "Creating a new key pair:"
         print "Warning: This is a pseudo-random generation.\n"
     else:
@@ -510,7 +510,7 @@ def sendCertificate(i):
         print "Please first run the -cc or the -u script.\n"
 
 
-def encrypt_file(key, in_filename, out_filename=None, chunksize=64*1024):
+def encrypt_file(key, in_filename, out_filename=None, chunksize=64*4096):
 
     #Thanks to Eli Bendersky: https://eli.thegreenplace.net/2010/06/25/aes-encryption-of-files-in-python-with-pycrypto/
     if not out_filename:
@@ -535,7 +535,7 @@ def encrypt_file(key, in_filename, out_filename=None, chunksize=64*1024):
                 outfile.write(encryptor.encrypt(chunk))
 
 
-def decrypt_file(key, in_filename, out_filename=None, chunksize=24*1024):
+def decrypt_file(key, in_filename, out_filename=None, chunksize=64*4096):
 
     #Thanks to Eli Bendersky: https://eli.thegreenplace.net/2010/06/25/aes-encryption-of-files-in-python-with-pycrypto/
     if not out_filename:
