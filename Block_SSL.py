@@ -200,7 +200,12 @@ def identityUpdate():
         dns = "keybase prove dns " + dns
         os.system(dns)
     elif ans1 == "3":
-        print "123"
+        raw_input("Plase your private pgp key to pgp.txt file, in the scripts directory, and press Enter.")
+        os.system("keybase pgp import -i pgp.txt")
+    elif ans1 == "4":
+        print "\nCreating a new key pair:"
+        print "Warning: This is a pseudo-random generation.\n"
+        os.system("keybase pgp gen")
     else:
         print "\nPlease run the script again, with a valid option."
         sys.exit()
