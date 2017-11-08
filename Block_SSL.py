@@ -9,7 +9,7 @@ import struct
 import getpass
 import datetime
 import json
-import requests
+import requests #pip install requests
 import traceback
 import subprocess
 from datetime import timedelta
@@ -20,7 +20,7 @@ from ecdsa import SigningKey
 #For pybitcoin download and install from:
 #https://github.com/blockstack/pybitcoin.git
 
-lackofart = r'''
+art = r'''
 
   ____  _            _           _____ _____ _
  |  _ \| |          | |         / ____/ ____| |
@@ -41,7 +41,7 @@ lackofart = r'''
 '''
 
 def identityCreation():
-    print lackofart
+    print art
     print "\nIdentity Creation Script - Block SSL\n"
     name = "keybase"
     try: #check if keybase exists
@@ -151,7 +151,7 @@ def identityCreation():
 
 
 def identityUpdate():
-    print lackofart
+    print art
     print "\nIdentity Update Script - Block SSL\n"
     print "Which way do you want to update your digital Identity - Generation Address? default: [1]\n"
     print "\t1. Generate Social Media Proof\n"
@@ -200,7 +200,7 @@ def identityUpdate():
         dns = "keybase prove dns " + dns
         os.system(dns)
     elif ans1 == "3":
-
+        print "123"
     else:
         print "\nPlease run the script again, with a valid option."
         sys.exit()
@@ -210,12 +210,12 @@ def identityUpdate():
 
 
 def identityCheck():
-    print lackofart
+    print art
     sys.exit()
 
 
 def certificateCreation():
-    print lackofart
+    print art
     print "\nCertificate Creation Script - Block SSL\n"
     # create a key pair
     print "Creating a new key pair:"
@@ -270,7 +270,7 @@ def certificateCreation():
 
 
 def certificateUpdate():
-    print lackofart
+    print art
     print "\nCertificate Update Script - Block SSL\n"
     # create a key pair or use the old one
     ans = raw_input("Do you have your old keys.key file with your key pair? [Y]es [N]o, default: [Y]\n")
@@ -304,7 +304,7 @@ def certificateUpdate():
 
 
 def certificateRevocation():
-    print lackofart
+    print art
     print "\nCertificate Revocation Script - Block SSL\n"
     print "In which of your addresses do you still have access? default: [1]\n"
     print "\t1. All of the addresses. (Generation, Certificate, Revocation)"
@@ -560,14 +560,14 @@ def main(argu):
     try:
         if argu[1] == "--help" or argu[1] == "-h":
             #Option to helo with the usage of the script
-            print lackofart
+            print art
             print "Usage: \"Block_SSL.py <option>\""
             print "\nFor a list of options use the --list option."
             print "\n"
 
         elif argu[1] == "--list":
             #List of available options that the user can use
-            print lackofart
+            print art
             print "Usage: \"Block_SSL.py <option>\""
             print "This is the list of options you can use with Block_SSL. \n"
             print "\t -i\t Identity Creation"
@@ -610,7 +610,7 @@ def main(argu):
             sendCertificate(i)
 
         elif argu[1] == "-d":
-            print lackofart
+            print art
             #Private Key Decryption Script
             password = getpass.getpass("Give your password: ")  #Ask for encryption password
             key = hashlib.sha256(password).digest()
