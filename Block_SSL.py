@@ -23,7 +23,7 @@ from ecdsa import SigningKey
 art = r'''
 
   ____  _            _           _____ _____ _
- |  _ \| |          | |         / ____/ ____| |
+ |  _ \| |          | |         / ____/ ____| |v0.3
  | |_) | | ___   ___| | _______| (___| (___ | |
  |  _ <| |/ _ \ / __| |/ /______\___ \\___ \| |
  | |_) | | (_) | (__|   <       ____) |___) | |____
@@ -43,29 +43,7 @@ art = r'''
 def identityCreation():
     print art
     print "\nIdentity Creation Script - Block SSL\n"
-    name = "keybase"
-    try: #check if keybase exists
-        devnull = open(os.devnull)
-        subprocess.Popen([name], stdout=devnull, stderr=devnull).communicate()
-        print "Keybase exists.\n"
-    except OSError as e: #install keybase - os specific
-            if e.errno == os.errno.ENOENT:
-                if sys.platform == "linux" or sys.platform == "linux2": #todo - currently only ubuntu based .deb files
-                    print "Downloading Keybase.dmg"
-                    os.system("curl -O https://prerelease.keybase.io/keybase_amd64.deb")
-                    print "Type your SuperUser Password:\n"
-                    os.system("sudo dpkg -i keybase_amd64.deb")
-                    os.system("sudo apt-get install -f")
-                elif sys.platform == "win32": #all Windows versions - run with powershell
-                    print "Downloading Keybase.exe\n"
-                    #download and run of the installation .exe with powershell
-                    subprocess.call(["C:\\WINDOWS\\system32\\WindowsPowerShell\\v1.0\\powershell.exe", "$down = New-Object System.Net.WebClient; $url = 'https://prerelease.keybase.io/keybase_setup_386.exe'; $file = 'keybase_setup_386.exe'; $down.DownloadFile($url,$file); $exec = New-Object -com shell.application; $exec.shellexecute($file); exit;"])
-                elif sys.platform == "darwin": #all OSX versions
-                    print "Downloading Keybase.dmg"
-                    os.system("curl -O https://prerelease.keybase.io/Keybase.dmg")
-                    print "Type your SuperUser Password:\n"
-                    os.system("sudo hdiutil attach keybase.dmg")
-                    os.system("sudo cp -ir /Volumes/Keybase/Keybase.app /Applications")
+    keybaseCheck()
     ans1 = raw_input("Do you own a Keybase.io account? [Y]es [N]o, default: [Y]\n")
     if ans1 == "Y" or ans1 == "y" or ans1 == "" or ans1 == " ":
         os.system("keybase version") #check for keybase version
@@ -153,14 +131,16 @@ def identityCreation():
 def identityUpdate():
     print art
     print "\nIdentity Update Script - Block SSL\n"
+    keybaseCheck()
     print "Which way do you want to update your digital Identity - Generation Address? default: [1]\n"
     print "\t1. Generate Social Media Proof\n"
     print "\t2. DNS Proof\n"
     print "\t3. Add PGP Key\n"
     print "\t4. Create a new PGP Key\n"
+    print "\t5. Follow a user\n"
     ans1 = raw_input()
     if ans1 == "1" or ans1 == "" or ans1 == " ":
-        print "Select the service you want to Proof:\n"
+        print "\nSelect the service you want to Proof:\n"
         print "\t1. Facebook\n"
         print "\t2. GitHub\n"
         print "\t3. Twitter\n"
@@ -206,6 +186,10 @@ def identityUpdate():
         print "\nCreating a new key pair:"
         print "Warning: This is a pseudo-random generation.\n"
         os.system("keybase pgp gen")
+    elif ans1 == "5":
+        user = raw_input("\nGive the users username: ")
+        user = "keybase track " + user
+        os.system(user)
     else:
         print "\nPlease run the script again, with a valid option."
         sys.exit()
@@ -215,7 +199,18 @@ def identityUpdate():
 
 
 def identityCheck():
+    #checks for the personal keybase identity of the user
     print art
+    keybaseCheck()
+    print "Keybase Followers: \n"
+    os.system("keybase list-followers")
+    print "\nKeybase Following: \n"
+    os.system("keybase list-following")
+    print "\nKeybase Devices: \n"
+    os.system("keybase device list")
+    print "\nGeneral User Info: \n"
+    os.system("keybase id")
+    print "\n"
     sys.exit()
 
 
@@ -561,6 +556,32 @@ def decrypt_file(key, in_filename, out_filename=None, chunksize=24*1024):
             outfile.truncate(origsize)
 
 
+def keybaseCheck():
+    name = "keybase"
+    try: #check if keybase exists
+        devnull = open(os.devnull)
+        subprocess.Popen([name], stdout=devnull, stderr=devnull).communicate()
+        print "\tKeybase exists.\n"
+    except OSError as e: #install keybase - os specific
+            if e.errno == os.errno.ENOENT:
+                if sys.platform == "linux" or sys.platform == "linux2": #todo - currently only ubuntu based .deb files
+                    print "Downloading Keybase.dmg"
+                    os.system("curl -O https://prerelease.keybase.io/keybase_amd64.deb")
+                    print "Type your SuperUser Password:\n"
+                    os.system("sudo dpkg -i keybase_amd64.deb")
+                    os.system("sudo apt-get install -f")
+                elif sys.platform == "win32": #all Windows versions - run with powershell
+                    print "Downloading Keybase.exe\n"
+                    #download and run of the installation .exe with powershell
+                    subprocess.call(["C:\\WINDOWS\\system32\\WindowsPowerShell\\v1.0\\powershell.exe", "$down = New-Object System.Net.WebClient; $url = 'https://prerelease.keybase.io/keybase_setup_386.exe'; $file = 'keybase_setup_386.exe'; $down.DownloadFile($url,$file); $exec = New-Object -com shell.application; $exec.shellexecute($file); exit;"])
+                elif sys.platform == "darwin": #all OSX versions
+                    print "Downloading Keybase.dmg"
+                    os.system("curl -O https://prerelease.keybase.io/Keybase.dmg")
+                    print "Type your SuperUser Password:\n"
+                    os.system("sudo hdiutil attach keybase.dmg")
+                    os.system("sudo cp -ir /Volumes/Keybase/Keybase.app /Applications")
+
+
 def main(argu):
     try:
         if argu[1] == "--help" or argu[1] == "-h":
@@ -646,8 +667,15 @@ def main(argu):
                 print "Saving to Revocation_Private.pem..."
             else:
                 print "\n Revocation Private Key does not exist."
+        else:
+            print art
+            print "Usage: \"Block_SSL.py <option>\""
+            print "\nFor a list of options use the --list option."
+            print "\nFor help use the --help or -h option."
+            print "\n"
 
     except IndexError:
+        print art
         print "Usage: \"Block_SSL.py <option>\""
         print "\nFor a list of options use the --list option."
         print "\nFor help use the --help or -h option."
