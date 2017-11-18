@@ -110,7 +110,7 @@ def identityCreation():
     print "\nRevocation Address: ", rev_pub.address()
     certadd = cert_pub.address()
     os.system("echo 3 | keybase currency add --force " + certadd + " >/dev/null 2>&1") #add cert address to keybase account
-    print "Certificate address added to your keybase.io account.\n"
+    print "\nCertificate address added to your keybase.io account.\n"
     print "\nPlease load your Generation and Revocation addresses with some satoshis."
     print "\nWarning: Please keep your Revocation address secret!"
     ans = raw_input("Do you want to encrypt your private key files? [Y]es [N]o, default: [Y]")
@@ -307,7 +307,7 @@ def certificateRevocation():
     print art
     print "\nCertificate Revocation Script - Block SSL\n"
     print "In which of your addresses do you still have access? default: [1]\n"
-    print "\t1. All of the addresses. (Generation, Certificate, Revocation)"
+    print "\t1. All of the addresses. (Generation, Certificate, Revocation)\n"
     print "\t2. Only Certificate address.\n"
     print "\t3. Only Revocation address.\n"
     print "\t4. Revocation and Generation addresses.\n"
@@ -330,7 +330,7 @@ def certificateRevocation():
                 else:
                     final_balance = final_balance + balance[i]
                     i += 1
-            print " Your Certificate address balance is: " + final_balance
+            print "\nYour Certificate address balance is: " + final_balance
             #Opening Generation private key from pem file
             if os.path.isfile('./Certificate_Private.pem'):
                 print "\nCertificate Private Key file exists."
